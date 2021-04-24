@@ -121,7 +121,7 @@ const AtCapacityNotice = ({teamData}: {teamData: TeamData}) => {
 }
 
 type TeamPageProps = {
-  team: TeamData | undefined
+  team: TeamData | {}
 }
 
 const Team = ({team: teamData}: TeamPageProps) => {
@@ -135,23 +135,6 @@ const Team = ({team: teamData}: TeamPageProps) => {
       router.push('/')
     }
   }, [teamDataNotAvailable])
-
-  const removeTeamMember = (userId: number) => {
-    if (teamData?.accountId) {
-      const removeTeamMemberUrl = `${process.env.NEXT_PUBLIC_AUTH_DOMAIN}/api/v1/accounts/${teamData.accountId}/team_members/${userId}`
-
-      return axios
-        .delete(removeTeamMemberUrl, {
-          headers: {...getAuthorizationHeader()},
-        })
-        .then((response: Object) => {
-          console.log({response, userId})
-          setMembers((prevMembers) => {
-            return prevMembers.filter(({id}: {id: number}) => id !== userId)
-          })
-        })
-    }
-  }
 
   if (teamData === undefined) return null
 
@@ -189,7 +172,7 @@ const Team = ({team: teamData}: TeamPageProps) => {
             numberOfMembers={members.length}
           />
         </h2>
-        <MemberTable members={members} removeTeamMember={removeTeamMember} />
+        <MemberTable members={members} />
       </div>
     </LoginRequired>
   )
@@ -204,7 +187,7 @@ export const getServerSideProps: GetServerSideProps<TeamPageProps> = async funct
 
   const {data: teams} = await loadTeams(eggheadToken)
 
-  let team: TeamData | undefined = undefined
+  let team: TeamData | {} = {}
 
   const fetchedTeam = teams && teams[0]
   if (fetchedTeam) {
